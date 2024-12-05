@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SANTA ROSA EN MAPAS</title>
+        
+        <!-- Cargar Leaflet desde el CDN (sólo una vez) -->
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    
+        <!-- Cargar dependencias de geotiff.js y plotty.js -->
+        <script src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/plotty.js"></script>
+        <script src="https://stuartmatthews.github.io/leaflet-geotiff/vendor/geotiff.js"></script>
+    
+        <!-- Cargar los plugins personalizados en el orden correcto -->
+        <script src="lib/leaflet-geotiff.js"></script> <!-- Primero leaflet-geotiff -->
+        <script src="lib/leaflet-geotiff-plotty.js"></script> <!-- Después leaflet-geotiff-plotty -->
+        
+        <!-- Estilos de Leaflet -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.7.5/proj4.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4leaflet/1.0.2/proj4leaflet.js"></script>
+
+
+        <!-- Archivo de estilos personalizado -->
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    
+
+<body>
+
+    <!-- Barra superior con título y logo -->
+    <div class="top-bar">
+        <img src="images/logo2.png" alt="Logo" class="logo-icon">
+        <span class="title">SANTA ROSA EN MAPAS</span>
+        <img src="images/logo.png" alt="Logo Empresa" class="logo">
+    </div>
+
+    <!-- Contenedor principal del menú -->
+    <div class="menu-container">
+        
+                <!-- Botones de control -->
+        <button id="refresh-button" onclick="refreshPage()">
+            <img src="images/actualizar.png" alt="Actualizar"">
+        </button>
+        <button id="toggleMapButton" onclick="alternarMapaBase()">
+            <img src="images/mapaBase.png" alt="Cambiar Mapa Base">
+        </button>
+        <button id="google-label-button">
+            <img src="images/label.png" alt="Etiquetas Maps">
+        </button>
+        <button id="medirDistanciaBtn" class="control-button">
+            <img src="images/distancia.png" alt="Medir distancia" title="Medir distancia">
+        </button>
+        <button id="medirAreaBtn" title="Medir área" class="control-button">
+            <img src="images/area.png" alt="Medir área">
+        </button>
+        <button id="calcularAreaBtn" style="display:none;">Calcular</button>
+
+        <button onclick="localizarUsuario()" id="localizar-button">
+            <img src="images/localizar.png" alt="Localizar">
+        </button>
+
+    
+    </div>
+
+
+<!--BOTON ANIMADO -->
+<div class="hamburger">
+  <div class="cell d-0"></div>
+  <div class="cell d-1"></div>
+  <div class="cell d-2"></div>
+  <div class="cell d-1"></div>
+  <div class="cell d-2"></div>
+  <div class="cell d-2"></div>
+  <div class="cell d-3"></div>
+  <div class="cell d-3"></div>
+  <div class="cell d-4"></div>
+  
+</div>
+
+
+
+        <!-- Botón hamburguesa 
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>-->
+
+   <!--INICIO MENU VERDE ESTILIZADO>-->
+   <div class="layer-menu playing" id="layerMenu">
+    <div class="image"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+    <div class="wave"></div>
+        
+    <div class="infotop">
+      
+      <div class="mTitutlo">
+        <div class="bg-menu" onclick="toggleAllLists()"><label id="titulo">MENU CAPAS</label></div>
+        <div class="blob-menu"></div>
+      </div>
+      
+
+      <div class="subtitulo" data-toggle="ajustadas">
+        <label id="subtitulo">CAPAS AJUSTADAS</label>
+      </div>
+      <ul class="list ajustadas">
+        <li><label class="container2"><input  type="checkbox" onclick="toggleLayer('Terrenos_Ajustados')"><div class="checkmark"></div> Terrenos</label></li>
+        <li><label class="container2"><input class="l" type="checkbox" onclick="toggleLayer('Construcciones_Ajustadas')"><div class="checkmark"></div> Construcciones A</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Construcciones_NO_IGAC')"><div class="checkmark"></div> Construcciones NO IGAC</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Manzanas_Ajustadas')"><div class="checkmark"></div> Manzanas</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Vias_Ajustadas')"><div class="checkmark"></div> Vías</label></li>
+      </ul>
+      
+      <div class="subtitulo" data-toggle="igac">
+        <label id="subtitulo">CAPAS IGAC</label>
+      </div>
+
+      <ul class="list igac">
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Terrenos_IGAC')"><div class="checkmark"></div> Terrenos</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Construcciones_IGAC')"><div class="checkmark"></div> Construcciones</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Manzanas_IGAC')"><div class="checkmark"></div> Manzanas</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Vias_IGAC')"><div class="checkmark"></div> Vías</label></li>
+        <li><label class="container2"><input type="checkbox" onclick="toggleLayer('Nomenclaruta_IGAC')"><div class="checkmark"></div> Nomenclatura</label></li>
+      </ul>
+      
+      <div class="subtitulo" data-toggle="ortoFoto">
+        <label id="subtitulo">ORTOFOTOS</label>
+    </div>
+    <ul class="list ortofotos" id="ortoFotoContent" style="display: none;">
+        <li>
+            <label class="container2">
+                <input id="ortoCheckbox" type="checkbox" onclick="toggleOrtofoto()">
+                <div class="checkmark"></div>
+                Ortofoto Urbana
+            </label>
+        </li>
+    </ul>
+   </div>
+  </div>
+  <!--FIN MENU VERDE ESTILIZADO>-->
+
+
+
+
+    <!-- Contenedor del mapa -->
+    <div id="map"></div>
+
+    <!-- Barra inferior -->
+<!-- Barra inferior, inicialmente oculta -->
+<div id="control-panel" class="bottom-bar">
+    <button class="control-panel-button">
+        <img src="images/PANEL.gif">
+    </button>
+
+    <!--<label for="visible-layers">Capas activas:</label>-->
+    <select id="visible-layers" onchange="updateLayerControl(this.value)">
+    <!--  <option value="" disabled selected>Seleccionar capa...</option> -->
+    <!-- Las opciones de capas activas se agregarán aquí dinámicamente -->
+    </select>
+
+    <!--Controles de propiedades de capas -->
+
+    <div class="card">
+    <!--<div id="layer-controls"></div>-->
+    <div class="bg" id="layer-controls"></div>
+    <div class="blob"></div>
+    </div>
+
+    
+    
+
+
+</div>
+
+
+
+
+
+    <!-- Popup de Bienvenida, Modal al final del body -->
+    <div id="welcome-modal" class="modal">
+        <div class="modal-content">
+            <img src="images/logoDS.png" alt="Logo DS" class="modal-logo">
+            <img src="images/logoRW4.png" alt="Logo RW" class="modal-logo">
+            <h1>BIENVENIDO A LA PLATAFORMA</h1>
+            <img src="images/logo2.png" alt="Logo RW" class="modal-logo">
+            <h2>SANTA ROSA EN MAPAS</h2>
+            <h3>Explora Nuestro Sistema de Información Geográfica.</h3>
+            <button class="button-modal" onclick="closeModal()">Cerrar</button>
+            <h4>Derechos Reservados.</h4>
+            
+        </div>
+    </div>
+
+    <script>
+        function closeModal() {
+            document.getElementById('welcome-modal').style.display = 'none';
+        }
+    </script>
+
+    
+<div class="button-container">
+    <a href="https://colombiads.com.co/" target="_blank">
+        <img src="images/logoDS.png" alt="Logo DS" class="icon-button">
+    </a>
+    <a href="https://rocawebs.com/" target="_blank">
+        <img src="images/logoRW.png" alt="Logo RW" class="icon-button">
+    </a>
+</div>
+
+    <!-- Script JS -->
+    <script src="script.js"></script>
+</body>
+</html>
